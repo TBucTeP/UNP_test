@@ -1,0 +1,104 @@
+﻿@model UNP.Models.UnpRequestModel
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUserModel> SignInManager
+@inject UserManager<ApplicationUserModel> UserManager
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+@if (SignInManager.IsSignedIn(User))
+{
+    <form asp-controller="Auth" asp-action="Logout" method="post" id="logoutForm">
+        <button type="submit" class="nav-link btn btn-link">Выход</button>
+    </form>
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    @if (!User.Identity.IsAuthenticated)
+    {
+        <p>Для использования сервиса необходимо <button id="loginButton" class="btn btn-primary">войти</button> или <button id="registerButton" class="btn btn-secondary">зарегистрироваться</button>.</p>
+    }
+    else
+    {
+        <form asp-controller="Home" asp-action="UnpEntry" method="post">
+            <div>
+                <label>Введите УНП:</label>
+                <input type="text" asp-for="Unp" class="form-control" />
+            </div>
+            <button type="submit" class="btn btn-primary">Проверить</button>
+        </form>
+    }
+</div>
+
+<!-- Модальное окно для входа -->
+<div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="loginModalLabel">Вход</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form asp-controller="Auth" asp-action="Login" method="post">
+                    <div class="form-group">
+                        <label>Email:</label>
+                        <input type="email" name="Email" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label>Пароль:</label>
+                        <input type="password" name="Password" class="form-control" />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Войти</button>
+                    <div asp-validation-summary="All" class="text-danger"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для регистрации -->
+<div class="modal fade" id="registerModal" tabindex="-1" role="dialog" aria-labelledby="registerModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="registerModalLabel">Регистрация</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form asp-controller="Register" asp-action="Register" method="post">
+                    <div class="form-group">
+                        <label>Email:</label>
+                        <input type="email" name="Email" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label>Пароль:</label>
+                        <input type="password" name="Password" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label>Подтвердите пароль:</label>
+                        <input type="password" name="ConfirmPassword" class="form-control" />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Регистрация</button>
+                    <div asp-validation-summary="All" class="text-danger"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById("loginButton").addEventListener("click", function () {
+            $("#loginModal").modal("show");
+        });
+
+        document.getElementById("registerButton").addEventListener("click", function () {
+            $("#registerModal").modal("show");
+        });
+    </script>
+}
