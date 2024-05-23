@@ -1,13 +1,10 @@
-﻿@model UNP.Models.UnpRequestModel
-@using Microsoft.AspNetCore.Identity
-@inject SignInManager<ApplicationUserModel> SignInManager
-@inject UserManager<ApplicationUserModel> UserManager
+﻿@using Microsoft.AspNetCore.Identity
+@model List<UNP.Models.UnpHistoryModel>
 
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Главная";
 }
 <link rel="stylesheet" href="~/css/home.css" />
-
 
 <div class="text-center">
     <h1 class="display-4">Проверка УНП</h1>
@@ -49,18 +46,14 @@
                     </tr>
                 </thead>
                 <tbody id="historyBody">
-                    @if (ViewData["UserHistories"] != null)
+                    @foreach (var history in Model)
                     {
-                        var histories = ViewData["UserHistories"] as List<UNP.Models.UnpHistoryModel>;
-                        foreach (var history in histories)
-                        {
-                            <tr>
-                               <td>@history.Unp</td>
-                               <td>@history.LastChecked.ToString("yyyy-MM-dd HH:mm:ss")</td>
-                               <td>@(history.IsInLocalDb ? "✔️" : "❌")</td>
-                               <td>@(history.IsInExternalDb ? "✔️" : "❌")</td>
-                            </tr>
-                        }
+                        <tr>
+                            <td>@history.Unp</td>
+                            <td>@history.LastChecked.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                            <td>@(history.IsInLocalDb ? "✔️" : "❌")</td>
+                            <td>@(history.IsInExternalDb ? "✔️" : "❌")</td>
+                        </tr>
                     }
                 </tbody>
             </table>

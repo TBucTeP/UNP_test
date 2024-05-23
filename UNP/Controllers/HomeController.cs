@@ -5,11 +5,7 @@ using UNP.Data;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
-using Newtonsoft.Json.Linq;
-using System.Threading.Tasks;
-using System.Net.Http;
 using Microsoft.EntityFrameworkCore;
-using System.Text.RegularExpressions;
 using System.Net;
 
 namespace UNP.Controllers
@@ -36,8 +32,10 @@ namespace UNP.Controllers
                     .Where(h => h.Email == email)
                     .OrderByDescending(h => h.LastChecked)
                     .ToList();
-                ViewData["UserHistories"] = userHistories;
+
+                return View(userHistories);
             }
+
             return View();
         }
 
@@ -45,29 +43,32 @@ namespace UNP.Controllers
         [Authorize]
         public async Task<IActionResult> UnpEntry(UnpRequestModel model)
         {
-            var results = new List<object>();
+            var results = new List<UnpEntryResponseModel>();
 
             if (!ModelState.IsValid)
             {
                 return BadRequest("Invalid data.");
             }
 
-            string[] unps = model.Unps.Split(new[] { ' ', ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] unps = model.Unps.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             var httpClient = _httpClientFactory.CreateClient();
 
             foreach (var unp in unps)
             {
-                if (!Regex.IsMatch(unp, @"^\d+$"))
-                {
-                    return BadRequest("Invalid UNP format.");
-                }
 
                 var storageRecord = await _context.UnpDatas.FirstOrDefaultAsync(u => u.Vunp == unp);
                 bool isInLocalDb = storageRecord != null;
                 bool isInExternalDb = false;
 
-                var response = await httpClient.GetAsync($"http://grp.nalog.gov.by/api/grp-public/data?unp={unp}&charset=UTF-8&type=json");
-                isInExternalDb = response.IsSuccessStatusCode;
+                try
+                {
+                    var response = await httpClient.GetAsync($"http://grp.nalog.gov.by/api/grp-public/data?unp={unp}&charset=UTF-8&type=json");
+                    isInExternalDb = response.IsSuccessStatusCode;
+                }
+                catch (Exception ex)
+                {
+                    return StatusCode((int)HttpStatusCode.InternalServerError, $"Error accessing external API: {ex.Message}");
+                }
 
                 var email = User.FindFirstValue(ClaimTypes.Email);
                 var historyRecord = new UnpHistoryModel
@@ -81,7 +82,7 @@ namespace UNP.Controllers
                 _context.UnpHistories.Add(historyRecord);
                 await _context.SaveChangesAsync();
 
-                results.Add(new
+                results.Add(new UnpEntryResponseModel
                 {
                     Unp = unp,
                     LastChecked = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
@@ -90,11 +91,11 @@ namespace UNP.Controllers
                 });
             }
 
-            return Json(results);
+            return Ok(results);
         }
 
         [HttpGet]
-        public async Task<ActionResult<object>> GetUnpDetails(string unp)
+        public async Task<ActionResult<UnpStorageModel>> GetUnpDetails(string unp)
         {
             var unpDetails = await _context.UnpDatas.FirstOrDefaultAsync(u => u.Vunp == unp);
 
@@ -103,12 +104,13 @@ namespace UNP.Controllers
                 return NotFound();
             }
 
-            return Ok(new
+            var result = new UnpStorageModel
             {
                 Id = unpDetails.Id,
                 Vunp = unpDetails.Vunp,
                 Vnaimp = unpDetails.Vnaimp,
                 Vnaimk = unpDetails.Vnaimk,
+                Vpadres = unpDetails.Vpadres,
                 Dreg = unpDetails.Dreg,
                 Nmns = unpDetails.Nmns,
                 Vmns = unpDetails.Vmns,
@@ -116,7 +118,9 @@ namespace UNP.Controllers
                 Dlikv = unpDetails.Dlikv,
                 Vlikv = unpDetails.Vlikv,
                 LastChecked = unpDetails.LastChecked
-            });
+            };
+
+            return Ok(result);
         }
 
         [HttpGet]

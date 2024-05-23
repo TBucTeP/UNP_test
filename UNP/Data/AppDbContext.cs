@@ -8,6 +8,7 @@ namespace UNP.Data
     {
         public DbSet<UnpHistoryModel> UnpHistories { get; set; }
         public DbSet<UnpStorageModel> UnpDatas { get; set; }
+        public DbSet<UnpHistoryChange> UnpHistoryChanges { get; set; }
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }

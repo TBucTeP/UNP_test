@@ -3,6 +3,9 @@ using UNP.Models;
 using Microsoft.EntityFrameworkCore;
 using NLog.Web;
 using Microsoft.AspNetCore.Identity;
+using UNP.Services;
+using UNP.Tasks;
+using Quartz;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +26,32 @@ builder.Services.AddIdentity<ApplicationUserModel, IdentityRole>(options =>
 
 builder.Services.AddRazorPages();
 builder.Services.AddHttpClient();
+
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddQuartz(q =>
+{
+    q.UseMicrosoftDependencyInjectionJobFactory();
+
+    var checkUnpJobKey = new JobKey("CheckUnpJob");
+    q.AddJob<CheckUnpJob>(opts => opts.WithIdentity(checkUnpJobKey));
+    q.AddTrigger(opts => opts
+        .ForJob(checkUnpJobKey)
+        .WithIdentity("CheckUnpJob-trigger")
+        .WithSimpleSchedule(x => x
+            .WithIntervalInHours(8)
+            .RepeatForever()));
+
+    var sendEmailJobKey = new JobKey("SendEmailJob");
+    q.AddJob<SendEmailJob>(opts => opts.WithIdentity(sendEmailJobKey));
+    q.AddTrigger(opts => opts
+        .ForJob(sendEmailJobKey)
+        .WithIdentity("emailSendingJob-trigger")
+        .StartAt(DateBuilder.DateOf(7, 00, 00))
+        .WithSimpleSchedule(x => x
+            .WithIntervalInHours(24)
+            .RepeatForever())); ;
+});
+builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 
 var app = builder.Build();
 
