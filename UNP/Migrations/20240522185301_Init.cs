@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace UNP.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class Init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -51,7 +51,30 @@ namespace UNP.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UnpEntries",
+                name: "UnpDatas",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Vunp = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Vnaimp = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Vnaimk = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Vpadres = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Dreg = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Nmns = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Vmns = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Ckodsost = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Dlikv = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Vlikv = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LastChecked = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UnpDatas", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UnpHistories",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -64,7 +87,7 @@ namespace UNP.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UnpEntries", x => x.Id);
+                    table.PrimaryKey("PK_UnpHistories", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -232,7 +255,10 @@ namespace UNP.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "UnpEntries");
+                name: "UnpDatas");
+
+            migrationBuilder.DropTable(
+                name: "UnpHistories");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

@@ -5,11 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - UNP</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/base.css" />
 </head>
 <body>
+    <header>
+        <div class="container d-flex justify-content-between align-items-center">
+            <h1 class="display-6">Проверка УНП</h1>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <form asp-controller="Auth" asp-action="Logout" method="post" class="logout-button">
+                        <button type="submit" class="btn btn-danger">Выход</button>
+                    </form>
+                }
+        </div>
+    </header>
+
     <div class="container">
         @RenderBody()
     </div>
+
+    <footer>
+        <div class="container">
+            &copy; 2024 Проверка УНП. Все права защищены.
+        </div>
+    </footer>
 
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>

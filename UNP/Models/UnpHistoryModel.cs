@@ -1,6 +1,6 @@
 ﻿namespace UNP.Models
 {
-    public class UnpModel
+    public class UnpHistoryModel
     {
         public int Id { get; set; }
         public string Unp { get; set; }

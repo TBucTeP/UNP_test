@@ -6,28 +6,65 @@
 @{
     ViewData["Title"] = "Home Page";
 }
-@if (SignInManager.IsSignedIn(User))
-{
-    <form asp-controller="Auth" asp-action="Logout" method="post" id="logoutForm">
-        <button type="submit" class="nav-link btn btn-link">Выход</button>
-    </form>
-}
+<link rel="stylesheet" href="~/css/home.css" />
+
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
+    <h1 class="display-4">Проверка УНП</h1>
     @if (!User.Identity.IsAuthenticated)
     {
-        <p>Для использования сервиса необходимо <button id="loginButton" class="btn btn-primary">войти</button> или <button id="registerButton" class="btn btn-secondary">зарегистрироваться</button>.</p>
+        <p class="display-6">Для использования сервиса необходимо <button id="loginButton" class="btn btn-primary">войти</button> или <button id="registerButton" class="btn btn-secondary">зарегистрироваться</button>.</p>
     }
     else
     {
-        <form asp-controller="Home" asp-action="UnpEntry" method="post">
-            <div>
-                <label>Введите УНП:</label>
-                <input type="text" asp-for="Unp" class="form-control" />
-            </div>
-            <button type="submit" class="btn btn-primary">Проверить</button>
-        </form>
+        <div class="d-flex align-items-center"> 
+            <input type="text" id="unpsInput" class="form-control mr-2" placeholder="Введите УНП" />
+            <button id="checkUnpsButton" class="btn btn-primary" onclick="checkUnps('@Url.Action("UnpEntry", "Home")')">Проверить</button>
+        </div>
+        <div id="resultsTable" class="mt-3">
+            <h2 class="mt-4">РЕЗУЛЬТАТ ПРОВЕРКИ</h2>
+            <table id="resultsTable" class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>УНП</th>
+                        <th>Дата проверки</th>
+                        <th>В локальной базе</th>
+                        <th>Во внешней базе</th>
+                    </tr>
+                </thead>
+                <tbody id="resultsBody">
+                </tbody>
+            </table>
+        </div>
+
+        <div id="userHistoryTable" class="mt-3">
+            <h2 class="mt-4">ИСТОРИЯ ПРОВЕРОК</h2>
+            <table id="historyTable" class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>УНП</th>
+                        <th>Дата проверки</th>
+                        <th>В локальной базе</th>
+                        <th>Во внешней базе</th>
+                    </tr>
+                </thead>
+                <tbody id="historyBody">
+                    @if (ViewData["UserHistories"] != null)
+                    {
+                        var histories = ViewData["UserHistories"] as List<UNP.Models.UnpHistoryModel>;
+                        foreach (var history in histories)
+                        {
+                            <tr>
+                               <td>@history.Unp</td>
+                               <td>@history.LastChecked.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                               <td>@(history.IsInLocalDb ? "✔️" : "❌")</td>
+                               <td>@(history.IsInExternalDb ? "✔️" : "❌")</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
     }
 </div>
 
@@ -91,14 +128,4 @@
     </div>
 </div>
 
-@section Scripts {
-    <script>
-        document.getElementById("loginButton").addEventListener("click", function () {
-            $("#loginModal").modal("show");
-        });
-
-        document.getElementById("registerButton").addEventListener("click", function () {
-            $("#registerModal").modal("show");
-        });
-    </script>
-}
+<script src="~/js/home.js"></script>

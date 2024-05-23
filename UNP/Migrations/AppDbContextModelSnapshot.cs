@@ -220,7 +220,7 @@ namespace UNP.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("UNP.Models.UnpModel", b =>
+            modelBuilder.Entity("UNP.Models.UnpHistoryModel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -247,7 +247,7 @@ namespace UNP.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UnpEntries");
+                    b.ToTable("UnpHistories");
                 });
 
             modelBuilder.Entity("UNP.Models.UnpStorageModel", b =>
@@ -290,6 +290,10 @@ namespace UNP.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Vnaimp")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Vpadres")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

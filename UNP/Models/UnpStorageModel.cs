@@ -6,6 +6,7 @@
         public string Vunp { get; set; }
         public string Vnaimp { get; set; }
         public string Vnaimk { get; set; }
+        public string Vpadres { get; set; }
         public string Dreg { get; set; }
         public string Nmns { get; set; }
         public string Vmns { get; set; }

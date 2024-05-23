@@ -2,6 +2,6 @@
 {
     public class UnpRequestModel
     {
-        public string Unp { get; set; }
+        public string Unps { get; set; }
     }
 }
