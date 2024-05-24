@@ -1,8 +1,5 @@
 ﻿using MailKit.Net.Smtp;
 using MimeKit;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using UNP.Models;
 using UNP.Data;
 
 namespace UNP.Services
@@ -26,17 +23,20 @@ namespace UNP.Services
                 .GroupBy(c => c.Email)
                 .ToList();
 
+            int emailCount = 0;
+            const int batchSize = 100;
+
             foreach (var changeGroup in changes)
             {
                 var email = changeGroup.Key;
                 var message = new MimeMessage();
-                message.From.Add(new MailboxAddress("Your App", "yourapp@example.com"));
-                message.To.Add(new MailboxAddress(email));
+                message.From.Add(new MailboxAddress("UNP", "yourapp@example.com"));
+                message.To.Add(new MailboxAddress("", email));
                 message.Subject = "UNP Status Changes";
 
                 var bodyBuilder = new BodyBuilder
                 {
-                    HtmlBody = "<h1>UNP Status Changes</h1><ul>"
+                    HtmlBody = "<h1>UNP - Изменения статусов</h1><ul>"
                 };
 
                 foreach (var change in changeGroup)
@@ -56,8 +56,17 @@ namespace UNP.Services
 
                 // Удаление изменений после отправки email
                 _context.UnpHistoryChanges.RemoveRange(changeGroup);
+
+                emailCount++;
+
+                // Если отправлено 100 писем, делаем перерыв на 5 минут
+                if (emailCount % batchSize == 0)
+                {
+                    await Task.Delay(5 * 60 * 1000);
+                }
             }
 
             await _context.SaveChangesAsync();
         }
     }
+}

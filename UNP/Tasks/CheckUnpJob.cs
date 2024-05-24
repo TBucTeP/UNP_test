@@ -1,7 +1,6 @@
 ﻿using Quartz;
 using UNP.Data;
 using UNP.Models;
-using UNP.Services;
 
 namespace UNP.Tasks
 {
@@ -43,7 +42,7 @@ namespace UNP.Tasks
                         Unp = history.Unp,
                         Email = history.Email,
                         ChangeDate = DateTime.Now,
-                        ChangeType = "Status changed"
+                        ChangeType = "Статус изменился"
                     });
                 }
             }
