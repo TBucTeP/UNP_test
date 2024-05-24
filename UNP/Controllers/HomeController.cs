@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
+using UNP.Data.Repo.Interfaces;
+using UNP.Data.Repo.Impl;
 
 namespace UNP.Controllers
 {
@@ -15,27 +17,27 @@ namespace UNP.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly AppDbContext _context;
+        private readonly IUnpHistoryRepository _unpHistoryRepository;
+        private readonly IUnpRepository _unpRepository;
 
-        public HomeController(ILogger<HomeController> logger, IHttpClientFactory httpClientFactory, AppDbContext context)
+
+        public HomeController(IUnpRepository unpRepository, ILogger<HomeController> logger, IHttpClientFactory httpClientFactory, AppDbContext context, IUnpHistoryRepository unpHistoryRepository)
         {
             _logger = logger;
             _context = context;
             _httpClientFactory = httpClientFactory;
+            _unpHistoryRepository = unpHistoryRepository;
+            _unpRepository = unpRepository;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             if (User.Identity.IsAuthenticated)
             {
                 var email = User.FindFirstValue(ClaimTypes.Email);
-                var userHistories = _context.UnpHistories
-                    .Where(h => h.Email == email)
-                    .OrderByDescending(h => h.LastChecked)
-                    .ToList();
-
+                var userHistories = await _unpHistoryRepository.GetUserHistoriesByEmailAsync(email);
                 return View(userHistories);
             }
-
             return View();
         }
 
@@ -55,8 +57,7 @@ namespace UNP.Controllers
 
             foreach (var unp in unps)
             {
-
-                var storageRecord = await _context.UnpDatas.FirstOrDefaultAsync(u => u.Vunp == unp);
+                var storageRecord = await _unpRepository.GetUnpDataAsync(unp);
                 bool isInLocalDb = storageRecord != null;
                 bool isInExternalDb = false;
 
@@ -79,8 +80,9 @@ namespace UNP.Controllers
                     IsInExternalDb = isInExternalDb,
                     LastChecked = DateTime.Now
                 };
-                _context.UnpHistories.Add(historyRecord);
-                await _context.SaveChangesAsync();
+
+                await _unpRepository.AddUnpHistoryAsync(historyRecord);
+                await _unpRepository.SaveChangesAsync();
 
                 results.Add(new UnpEntryResponseModel
                 {
@@ -90,14 +92,13 @@ namespace UNP.Controllers
                     IsInExternalDb = isInExternalDb ? "✔️" : "❌"
                 });
             }
-
             return Ok(results);
         }
 
         [HttpGet]
         public async Task<ActionResult<UnpStorageModel>> GetUnpDetails(string unp)
         {
-            var unpDetails = await _context.UnpDatas.FirstOrDefaultAsync(u => u.Vunp == unp);
+            var unpDetails = await _unpRepository.GetUnpDataAsync(unp);
 
             if (unpDetails == null)
             {
@@ -119,7 +120,6 @@ namespace UNP.Controllers
                 Vlikv = unpDetails.Vlikv,
                 LastChecked = unpDetails.LastChecked
             };
-
             return Ok(result);
         }
 

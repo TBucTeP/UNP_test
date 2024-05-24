@@ -1,11 +1,13 @@
 using UNP.Data;
-using UNP.Models;
+using UNP.Models; 
 using Microsoft.EntityFrameworkCore;
 using NLog.Web;
 using Microsoft.AspNetCore.Identity;
 using UNP.Services;
 using UNP.Tasks;
 using Quartz;
+using UNP.Data.Repo.Impl;
+using UNP.Data.Repo.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,7 +17,12 @@ builder.Host.UseNLog();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
- 
+
+builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>
+{
+    builder.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
+}));
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -26,6 +33,9 @@ builder.Services.AddIdentity<ApplicationUserModel, IdentityRole>(options =>
 
 builder.Services.AddRazorPages();
 builder.Services.AddHttpClient();
+
+builder.Services.AddScoped<IUnpHistoryRepository, UnpHistoryRepository>();
+builder.Services.AddScoped<IUnpRepository, UnpRepository>();
 
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddQuartz(q =>
