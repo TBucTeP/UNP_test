@@ -6,7 +6,5 @@ namespace UNP.Data.Repo.Interfaces
     {
         Task<UnpStorageModel> GetUnpDataAsync(string unp);
         Task AddUnpHistoryAsync(UnpHistoryModel unpHistory);
-        Task SaveChangesAsync();
-
     }
 }

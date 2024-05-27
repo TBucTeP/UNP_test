@@ -1,30 +1,22 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using UNP.Models;
-using UNP.Data;
 using System.Diagnostics;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
-using Microsoft.EntityFrameworkCore;
 using System.Net;
 using UNP.Data.Repo.Interfaces;
-using UNP.Data.Repo.Impl;
 
 namespace UNP.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly AppDbContext _context;
         private readonly IUnpHistoryRepository _unpHistoryRepository;
         private readonly IUnpRepository _unpRepository;
 
 
-        public HomeController(IUnpRepository unpRepository, ILogger<HomeController> logger, IHttpClientFactory httpClientFactory, AppDbContext context, IUnpHistoryRepository unpHistoryRepository)
+        public HomeController(IUnpRepository unpRepository, IHttpClientFactory httpClientFactory, IUnpHistoryRepository unpHistoryRepository)
         {
-            _logger = logger;
-            _context = context;
             _httpClientFactory = httpClientFactory;
             _unpHistoryRepository = unpHistoryRepository;
             _unpRepository = unpRepository;
@@ -82,7 +74,6 @@ namespace UNP.Controllers
                 };
 
                 await _unpRepository.AddUnpHistoryAsync(historyRecord);
-                await _unpRepository.SaveChangesAsync();
 
                 results.Add(new UnpEntryResponseModel
                 {

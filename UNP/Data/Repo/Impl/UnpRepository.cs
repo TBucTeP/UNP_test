@@ -21,10 +21,6 @@ namespace UNP.Data.Repo.Impl
         public async Task AddUnpHistoryAsync(UnpHistoryModel unpHistory)
         {
             await _context.UnpHistories.AddAsync(unpHistory);
-        }
-
-        public async Task SaveChangesAsync()
-        {
             await _context.SaveChangesAsync();
         }
     }
